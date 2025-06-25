@@ -31,12 +31,14 @@ app.include_router(chat.router)
 @app.get("/")
 async def root():
     """API 루트 엔드포인트"""
-    return {
+    data = {
         "message": "온라인 쇼핑 최저가 탐색 AI 에이전트 API", 
         "version": "1.1.0",
         "status": "running",
         "features": ["GitHub Actions", "Auto PR/Issue Management"]
     }
+    # 의도적 버그: 존재하지 않는 키 참조
+    return data["nonexistent_key"]
 
 @app.get("/health")
 async def health_check():
