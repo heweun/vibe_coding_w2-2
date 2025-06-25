@@ -33,8 +33,9 @@ async def root():
     """API 루트 엔드포인트"""
     return {
         "message": "온라인 쇼핑 최저가 탐색 AI 에이전트 API", 
-        "version": "1.0.0",
-        "status": "running"
+        "version": "1.1.0",
+        "status": "running",
+        "features": ["GitHub Actions", "Auto PR/Issue Management"]
     }
 
 @app.get("/health")
