@@ -1,0 +1,119 @@
+name: PR Auto Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Auto code review
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo, number } = context.issue;
+          
+          // 변경된 파일들 가져오기
+          const files = await github.rest.pulls.listFiles({
+            owner,
+            repo,
+            pull_number: number
+          });
+          
+          const reviews = [];
+          
+          for (const file of files.data) {
+            const filename = file.filename;
+            const patch = file.patch || '';
+            
+            // Python 파일 체크
+            if (filename.endsWith('.py')) {
+              const lines = patch.split('\n');
+              let lineNumber = 0;
+              
+              for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                if (line.startsWith('@@')) {
+                  const match = line.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+                  if (match) {
+                    lineNumber = parseInt(match[1]) - 1;
+                  }
+                  continue;
+                }
+                
+                if (line.startsWith('+')) {
+                  lineNumber++;
+                  const code = line.substring(1);
+                  
+                  // 코드 스타일 체크
+                  if (code.includes('print(') && !filename.includes('test_')) {
+                    reviews.push({
+                      path: filename,
+                      line: lineNumber,
+                      body: '🔍 **코드 리뷰**: print() 문이 발견되었습니다. 프로덕션 코드에서는 logging을 사용하는 것을 권장합니다.'
+                    });
+                  }
+                  
+                  if (code.length > 100) {
+                    reviews.push({
+                      path: filename,
+                      line: lineNumber,
+                      body: '📏 **코드 리뷰**: 라인이 너무 깁니다 (100자 초과). 가독성을 위해 줄바꿈을 고려해보세요.'
+                    });
+                  }
+                  
+                  if (code.includes('TODO') || code.includes('FIXME')) {
+                    reviews.push({
+                      path: filename,
+                      line: lineNumber,
+                      body: '📝 **코드 리뷰**: TODO/FIXME 주석이 발견되었습니다. 이슈로 등록하는 것을 고려해보세요.'
+                    });
+                  }
+                  
+                  // 보안 관련 체크
+                  if (code.includes('password') || code.includes('secret') || code.includes('token')) {
+                    reviews.push({
+                      path: filename,
+                      line: lineNumber,
+                      body: '🔒 **보안 리뷰**: 민감한 정보가 하드코딩되어 있지 않은지 확인해주세요. 환경변수 사용을 권장합니다.'
+                    });
+                  }
+                } else if (!line.startsWith('-')) {
+                  lineNumber++;
+                }
+              }
+            }
+          }
+          
+          // 리뷰 코멘트가 있으면 리뷰 생성
+          if (reviews.length > 0) {
+            try {
+              await github.rest.pulls.createReview({
+                owner,
+                repo,
+                pull_number: number,
+                body: `## 🤖 자동 코드 리뷰
+                
+이 리뷰는 자동으로 생성되었습니다. 기본적인 코드 스타일과 보안 사항을 체크합니다.
+
+**리뷰된 항목:**
+- 코드 스타일 (라인 길이, print 문 사용)
+- 보안 (하드코딩된 민감정보)
+- TODO/FIXME 주석
+
+더 자세한 리뷰는 팀 멤버가 진행해주세요! 👥`,
+                event: 'COMMENT',
+                comments: reviews.slice(0, 10) // 최대 10개까지만
+              });
+              
+              console.log(`자동 코드 리뷰 완료: ${reviews.length}개 항목 체크됨`);
+            } catch (error) {
+              console.log('자동 코드 리뷰 실패:', error.message);
+            }
+          } 

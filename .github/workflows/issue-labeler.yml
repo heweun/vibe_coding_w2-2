@@ -1,0 +1,120 @@
+name: Issue Auto Labeler
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Auto label issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo, number } = context.issue;
+          const issue = context.payload.issue;
+          
+          const title = issue.title.toLowerCase();
+          const body = issue.body ? issue.body.toLowerCase() : '';
+          const labels = new Set();
+          
+          // 이슈 유형 기반 라벨링
+          if (title.includes('bug') || title.includes('error') || title.includes('fail') || 
+              body.includes('error') || body.includes('exception') || body.includes('crash')) {
+            labels.add('bug');
+          }
+          
+          if (title.includes('feature') || title.includes('enhance') || title.includes('add') ||
+              body.includes('feature request') || body.includes('enhancement')) {
+            labels.add('enhancement');
+          }
+          
+          if (title.includes('question') || title.includes('help') || title.includes('how') ||
+              body.includes('how to') || body.includes('question')) {
+            labels.add('question');
+          }
+          
+          if (title.includes('doc') || title.includes('readme') || 
+              body.includes('documentation') || body.includes('docs')) {
+            labels.add('documentation');
+          }
+          
+          // 컴포넌트 기반 라벨링
+          if (title.includes('backend') || title.includes('api') || title.includes('server') ||
+              body.includes('backend') || body.includes('fastapi') || body.includes('router')) {
+            labels.add('backend');
+          }
+          
+          if (title.includes('frontend') || title.includes('ui') || title.includes('streamlit') ||
+              body.includes('frontend') || body.includes('interface') || body.includes('user interface')) {
+            labels.add('frontend');
+          }
+          
+          if (title.includes('test') || title.includes('testing') ||
+              body.includes('test') || body.includes('pytest')) {
+            labels.add('testing');
+          }
+          
+          if (title.includes('ci') || title.includes('cd') || title.includes('deploy') ||
+              body.includes('deployment') || body.includes('github actions') || body.includes('workflow')) {
+            labels.add('ci/cd');
+          }
+          
+          if (title.includes('security') || title.includes('auth') ||
+              body.includes('security') || body.includes('authentication') || body.includes('authorization')) {
+            labels.add('security');
+          }
+          
+          if (title.includes('performance') || title.includes('slow') || title.includes('optimization') ||
+              body.includes('performance') || body.includes('optimize') || body.includes('speed')) {
+            labels.add('performance');
+          }
+          
+          // 우선순위 기반 라벨링
+          if (title.includes('critical') || title.includes('urgent') || title.includes('blocker') ||
+              body.includes('critical') || body.includes('production') || body.includes('urgent')) {
+            labels.add('priority/high');
+          } else if (title.includes('minor') || title.includes('trivial') ||
+                     body.includes('minor') || body.includes('nice to have')) {
+            labels.add('priority/low');
+          } else {
+            labels.add('priority/medium');
+          }
+          
+          // 상태 라벨
+          labels.add('status/triage');
+          
+          // 이슈 작성자가 첫 기여자인지 확인
+          try {
+            const author = issue.user.login;
+            const { data: authorIssues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              creator: author,
+              state: 'all'
+            });
+            
+            if (authorIssues.length === 1) { // 현재 이슈가 첫 번째
+              labels.add('good first issue');
+              labels.add('first-time-contributor');
+            }
+          } catch (error) {
+            console.log('기여자 정보 확인 실패:', error.message);
+          }
+          
+          // 라벨 적용
+          if (labels.size > 0) {
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: number,
+                labels: Array.from(labels)
+              });
+              
+              console.log(`라벨 추가 완료: ${Array.from(labels).join(', ')}`);
+            } catch (error) {
+              console.log('라벨 추가 실패:', error.message);
+            }
+          } 

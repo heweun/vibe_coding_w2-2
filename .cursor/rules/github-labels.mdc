@@ -1,0 +1,138 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# GitHub 라벨 정의
+
+## 라벨 생성 가이드
+
+프로젝트에서 다음 라벨들을 생성하여 이슈와 PR을 효과적으로 관리하세요.
+
+### 유형별 라벨 (Type Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `bug` | `#d73a4a` | 버그 리포트 및 수정 |
+| `enhancement` | `#a2eeef` | 새로운 기능 또는 개선 사항 |
+| `question` | `#d876e3` | 질문 및 도움 요청 |
+| `documentation` | `#0075ca` | 문서 작성 및 업데이트 |
+| `refactor` | `#fbca04` | 코드 리팩토링 |
+
+### 컴포넌트별 라벨 (Component Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `backend` | `#0e8a16` | 백엔드/API 관련 |
+| `frontend` | `#1d76db` | 프론트엔드/UI 관련 |
+| `testing` | `#f9d0c4` | 테스트 코드 및 테스팅 |
+| `ci/cd` | `#5319e7` | CI/CD 파이프라인 관련 |
+| `security` | `#b60205` | 보안 관련 이슈 |
+| `performance` | `#ff6347` | 성능 최적화 |
+| `dependencies` | `#0366d6` | 의존성 관리 |
+
+### 우선순위 라벨 (Priority Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `priority/high` | `#ff0000` | 높은 우선순위 (긴급) |
+| `priority/medium` | `#ffaa00` | 중간 우선순위 (기본값) |
+| `priority/low` | `#00ff00` | 낮은 우선순위 |
+
+### 상태 라벨 (Status Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `status/triage` | `#ededed` | 검토 및 분류 필요 |
+| `status/in-progress` | `#0052cc` | 현재 작업 중 |
+| `status/blocked` | `#e11d21` | 차단된 상태 |
+| `status/ready` | `#159818` | 작업 준비 완료 |
+| `status/on-hold` | `#fbca04` | 보류 상태 |
+
+### 크기 라벨 (Size Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `size/small` | `#c2e0c6` | 50줄 미만의 작은 변경 |
+| `size/medium` | `#fef2c0` | 50-200줄의 중간 변경 |
+| `size/large` | `#f9c2c2` | 200줄 초과의 큰 변경 |
+
+### 기여자 라벨 (Contributor Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `good first issue` | `#7057ff` | 초보자에게 적합한 이슈 |
+| `first-time-contributor` | `#1e6e00` | 첫 기여자 |
+| `help wanted` | `#008672` | 도움이 필요한 이슈 |
+
+### 특수 라벨 (Special Labels)
+
+| 라벨명 | 색상 | 설명 |
+|--------|------|------|
+| `breaking-change` | `#d93f0b` | 호환성을 깨는 변경 |
+| `duplicate` | `#cfd3d7` | 중복된 이슈 |
+| `invalid` | `#e4e669` | 유효하지 않은 이슈 |
+| `wontfix` | `#ffffff` | 수정하지 않을 이슈 |
+
+## 라벨 생성 스크립트
+
+GitHub CLI를 사용하여 라벨을 일괄 생성할 수 있습니다:
+
+```bash
+# 유형별 라벨
+gh label create "bug" --description "버그 리포트 및 수정" --color "d73a4a"
+gh label create "enhancement" --description "새로운 기능 또는 개선 사항" --color "a2eeef"
+gh label create "question" --description "질문 및 도움 요청" --color "d876e3"
+gh label create "documentation" --description "문서 작성 및 업데이트" --color "0075ca"
+gh label create "refactor" --description "코드 리팩토링" --color "fbca04"
+
+# 컴포넌트별 라벨
+gh label create "backend" --description "백엔드/API 관련" --color "0e8a16"
+gh label create "frontend" --description "프론트엔드/UI 관련" --color "1d76db"
+gh label create "testing" --description "테스트 코드 및 테스팅" --color "f9d0c4"
+gh label create "ci/cd" --description "CI/CD 파이프라인 관련" --color "5319e7"
+gh label create "security" --description "보안 관련 이슈" --color "b60205"
+gh label create "performance" --description "성능 최적화" --color "ff6347"
+gh label create "dependencies" --description "의존성 관리" --color "0366d6"
+
+# 우선순위 라벨
+gh label create "priority/high" --description "높은 우선순위 (긴급)" --color "ff0000"
+gh label create "priority/medium" --description "중간 우선순위 (기본값)" --color "ffaa00"
+gh label create "priority/low" --description "낮은 우선순위" --color "00ff00"
+
+# 상태 라벨
+gh label create "status/triage" --description "검토 및 분류 필요" --color "ededed"
+gh label create "status/in-progress" --description "현재 작업 중" --color "0052cc"
+gh label create "status/blocked" --description "차단된 상태" --color "e11d21"
+gh label create "status/ready" --description "작업 준비 완료" --color "159818"
+gh label create "status/on-hold" --description "보류 상태" --color "fbca04"
+
+# 크기 라벨
+gh label create "size/small" --description "50줄 미만의 작은 변경" --color "c2e0c6"
+gh label create "size/medium" --description "50-200줄의 중간 변경" --color "fef2c0"
+gh label create "size/large" --description "200줄 초과의 큰 변경" --color "f9c2c2"
+
+# 기여자 라벨
+gh label create "good first issue" --description "초보자에게 적합한 이슈" --color "7057ff"
+gh label create "first-time-contributor" --description "첫 기여자" --color "1e6e00"
+gh label create "help wanted" --description "도움이 필요한 이슈" --color "008672"
+
+# 특수 라벨
+gh label create "breaking-change" --description "호환성을 깨는 변경" --color "d93f0b"
+gh label create "duplicate" --description "중복된 이슈" --color "cfd3d7"
+gh label create "invalid" --description "유효하지 않은 이슈" --color "e4e669"
+gh label create "wontfix" --description "수정하지 않을 이슈" --color "ffffff"
+```
+
+## 라벨 사용 가이드라인
+
+### 자동 라벨링 규칙
+1. **파일 변경 기반**: 변경된 파일의 경로에 따라 컴포넌트 라벨 자동 부여
+2. **제목 분석**: 이슈/PR 제목의 키워드 분석으로 유형 라벨 부여
+3. **크기 계산**: 변경된 코드 라인 수에 따라 크기 라벨 자동 부여
+
+### 수동 라벨링 가이드
+- 복잡한 이슈는 여러 라벨을 조합하여 사용
+- 우선순위 라벨은 팀 논의 후 결정
+- 상태 라벨은 이슈 진행 상황에 따라 업데이트
+- 기여자 라벨은 커뮤니티 활성화를 위해 적극 활용

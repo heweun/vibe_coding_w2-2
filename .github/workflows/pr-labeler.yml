@@ -1,0 +1,90 @@
+name: PR Auto Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Auto label PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo, number } = context.issue;
+          const pr = context.payload.pull_request;
+          
+          // 변경된 파일 목록 가져오기
+          const files = await github.rest.pulls.listFiles({
+            owner,
+            repo,
+            pull_number: number
+          });
+          
+          const changedFiles = files.data.map(file => file.filename);
+          const labels = new Set();
+          
+          // 파일 경로 기반 라벨링
+          changedFiles.forEach(file => {
+            if (file.startsWith('backend/')) {
+              labels.add('backend');
+            }
+            if (file.startsWith('frontend/')) {
+              labels.add('frontend');
+            }
+            if (file.startsWith('docs/')) {
+              labels.add('documentation');
+            }
+            if (file.includes('test_') || file.includes('.test.')) {
+              labels.add('tests');
+            }
+            if (file === 'requirements.txt' || file === 'setup.py') {
+              labels.add('dependencies');
+            }
+            if (file.startsWith('.github/')) {
+              labels.add('ci/cd');
+            }
+          });
+          
+          // PR 제목 기반 라벨링
+          const title = pr.title.toLowerCase();
+          if (title.includes('fix') || title.includes('bug')) {
+            labels.add('bug');
+          }
+          if (title.includes('feat') || title.includes('feature')) {
+            labels.add('enhancement');
+          }
+          if (title.includes('refactor')) {
+            labels.add('refactor');
+          }
+          if (title.includes('docs') || title.includes('documentation')) {
+            labels.add('documentation');
+          }
+          if (title.includes('breaking') || title.includes('major')) {
+            labels.add('breaking-change');
+          }
+          
+          // 변경 사항 크기 기반 라벨링
+          const totalChanges = files.data.reduce((sum, file) => sum + file.changes, 0);
+          if (totalChanges < 50) {
+            labels.add('size/small');
+          } else if (totalChanges < 200) {
+            labels.add('size/medium');
+          } else {
+            labels.add('size/large');
+          }
+          
+          // 라벨 적용
+          if (labels.size > 0) {
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: number,
+              labels: Array.from(labels)
+            });
+            
+            console.log(`라벨 추가 완료: ${Array.from(labels).join(', ')}`);
+          } 

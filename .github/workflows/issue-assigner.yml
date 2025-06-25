@@ -1,0 +1,90 @@
+name: Issue Auto Assigner
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Auto assign issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo, number } = context.issue;
+          const issue = context.payload.issue;
+          const issueAuthor = issue.user.login;
+          
+          // 팀 멤버 목록 (프로젝트에 맞게 수정)
+          const teamMembers = {
+            'backend': ['backend-dev1', 'backend-dev2'],
+            'frontend': ['frontend-dev1', 'frontend-dev2'],
+            'devops': ['devops-dev1'],
+            'general': ['lead-dev', 'senior-dev']
+          };
+          
+          // 이슈 내용 분석하여 적절한 담당자 선택
+          const title = issue.title.toLowerCase();
+          const body = issue.body ? issue.body.toLowerCase() : '';
+          
+          let category = 'general';
+          
+          if (title.includes('backend') || title.includes('api') || title.includes('server') || 
+              body.includes('backend') || body.includes('fastapi')) {
+            category = 'backend';
+          } else if (title.includes('frontend') || title.includes('ui') || title.includes('streamlit') || 
+                     body.includes('frontend') || body.includes('interface')) {
+            category = 'frontend';
+          } else if (title.includes('deploy') || title.includes('ci') || title.includes('docker') || 
+                     body.includes('deployment') || body.includes('github actions')) {
+            category = 'devops';
+          }
+          
+          // 해당 카테고리의 담당자 중 선택 (작성자 제외)
+          const availableAssignees = teamMembers[category].filter(member => member !== issueAuthor);
+          
+          if (availableAssignees.length > 0) {
+            // 랜덤하게 담당자 선택 (또는 로드밸런싱 로직 구현 가능)
+            const selectedAssignee = availableAssignees[Math.floor(Math.random() * availableAssignees.length)];
+            
+            try {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: number,
+                assignees: [selectedAssignee]
+              });
+              
+              console.log(`담당자 할당 완료: ${selectedAssignee} (카테고리: ${category})`);
+              
+              // 담당자 할당 알림 댓글
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: number,
+                body: `👥 **담당자 할당**: @${selectedAssignee}님이 이 이슈를 담당하게 되었습니다.\n\n카테고리: \`${category}\``
+              });
+              
+            } catch (error) {
+              console.log('담당자 할당 실패:', error.message);
+              
+              // 실패 시 일반 담당자에게 할당
+              if (teamMembers.general.length > 0) {
+                const fallbackAssignee = teamMembers.general[0];
+                try {
+                  await github.rest.issues.addAssignees({
+                    owner,
+                    repo,
+                    issue_number: number,
+                    assignees: [fallbackAssignee]
+                  });
+                  console.log(`대체 담당자 할당 완료: ${fallbackAssignee}`);
+                } catch (fallbackError) {
+                  console.log('대체 담당자 할당도 실패:', fallbackError.message);
+                }
+              }
+            }
+          } else {
+            console.log('할당 가능한 담당자가 없습니다.');
+          } 

@@ -1,0 +1,50 @@
+name: PR Auto Assigner
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Auto assign PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo, number } = context.issue;
+          const prAuthor = context.payload.pull_request.user.login;
+          
+          // 기본 리뷰어 목록 (프로젝트에 맞게 수정)
+          const defaultReviewers = ['reviewer1', 'reviewer2'];
+          const availableReviewers = defaultReviewers.filter(reviewer => reviewer !== prAuthor);
+          
+          // PR 작성자가 아닌 사람들 중에서 리뷰어 선택
+          if (availableReviewers.length > 0) {
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: number,
+                reviewers: availableReviewers.slice(0, 2) // 최대 2명까지 할당
+              });
+              
+              console.log(`리뷰어 할당 완료: ${availableReviewers.slice(0, 2).join(', ')}`);
+            } catch (error) {
+              console.log('리뷰어 할당 실패:', error.message);
+            }
+          }
+          
+          // PR 작성자를 담당자로 할당
+          try {
+            await github.rest.issues.addAssignees({
+              owner,
+              repo,
+              issue_number: number,
+              assignees: [prAuthor]
+            });
+            
+            console.log(`담당자 할당 완료: ${prAuthor}`);
+          } catch (error) {
+            console.log('담당자 할당 실패:', error.message);
+          } 

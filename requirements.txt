@@ -1,0 +1,26 @@
+# Backend Dependencies
+fastapi
+uvicorn
+python-dotenv
+pydantic
+
+# AI/LLM Dependencies
+langchain
+langgraph
+langsmith
+langchain-google-genai
+
+# Search Dependencies
+duckduckgo-search
+
+# Frontend Dependencies
+streamlit
+requests
+
+# Testing Dependencies
+pytest
+pytest-asyncio
+httpx
+
+# Development Dependencies
+python-multipart 
