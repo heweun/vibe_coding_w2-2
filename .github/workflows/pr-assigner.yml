@@ -16,7 +16,7 @@ jobs:
           const prAuthor = context.payload.pull_request.user.login;
           
           // 기본 리뷰어 목록 (프로젝트에 맞게 수정)
-          const defaultReviewers = ['reviewer1', 'reviewer2'];
+          const defaultReviewers = ['heweun'];
           const availableReviewers = defaultReviewers.filter(reviewer => reviewer !== prAuthor);
           
           // PR 작성자가 아닌 사람들 중에서 리뷰어 선택

@@ -18,10 +18,10 @@ jobs:
           
           // 팀 멤버 목록 (프로젝트에 맞게 수정)
           const teamMembers = {
-            'backend': ['backend-dev1', 'backend-dev2'],
-            'frontend': ['frontend-dev1', 'frontend-dev2'],
-            'devops': ['devops-dev1'],
-            'general': ['lead-dev', 'senior-dev']
+            'backend': ['heweun'],
+            'frontend': ['heweun'],
+            'devops': ['heweun'],
+            'general': ['heweun']
           };
           
           // 이슈 내용 분석하여 적절한 담당자 선택
